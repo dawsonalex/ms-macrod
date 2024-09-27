@@ -8,35 +8,36 @@ import (
 	"github.com/dawsonalex/ms-macrod/core/entity"
 	"github.com/dawsonalex/ms-macrod/core/port"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 const foodListingIndexPath = "macrod.foodListing"
 
-type BatchErr struct {
-	error
-	ids []string
-}
-
 type FoodListing struct {
-	repo  port.FoodRepository
-	index bleve.Index
+	repo   port.FoodRepository
+	index  bleve.Index
+	logger *log.Entry
 }
 
-func NewFoodListing(repo port.FoodRepository) (*FoodListing, error) {
+func NewFoodListing(logger *log.Logger, repo port.FoodRepository) (*FoodListing, error) {
 	index, err := createOrOpeBleveIndex()
 	if err != nil {
 		return nil, err
 	}
 
+	serviceLogger := logger.WithFields(log.Fields{
+		"service": "foodlisting",
+	})
 	return &FoodListing{
-		repo:  repo,
-		index: index,
+		repo:   repo,
+		index:  index,
+		logger: serviceLogger,
 	}, nil
 }
 
 func createOrOpeBleveIndex() (bleve.Index, error) {
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New(foodListingIndexPath, mapping)
+	index, err := bleve.NewMemOnly(mapping)
 
 	// If the index exists we can just open it.
 	if err != nil && errors.Is(err, bleve.ErrorIndexPathExists) {
@@ -59,6 +60,10 @@ func newFoodListing(repo port.FoodRepository, index bleve.Index) (*FoodListing, 
 }
 
 func (f *FoodListing) CreateFood(ctx context.Context, food entity.FoodListing) error {
+	if food.Id == uuid.Nil {
+		food.Id = uuid.New()
+	}
+
 	err := f.repo.CreateFood(ctx, food)
 	if err != nil {
 		return err
@@ -72,7 +77,7 @@ func (f *FoodListing) GetFood(ctx context.Context, id uuid.UUID) (entity.FoodLis
 }
 
 func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodListing, error) {
-	bleveQuery := bleve.NewQueryStringQuery(query)
+	bleveQuery := bleve.NewQueryStringQuery(fmt.Sprintf("%s*", query))
 	searchRequest := bleve.NewSearchRequest(bleveQuery)
 	result, err := f.index.Search(searchRequest)
 	if err != nil {
@@ -80,26 +85,32 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 	}
 
 	foods := []entity.FoodListing{}
-	batchErr := BatchErr{
-		error: fmt.Errorf("error getting some matched foods"),
-		ids:   []string{},
-	}
+	missingIds := make([]string, 0)
 	for _, hit := range result.Hits {
 		id, err := uuid.Parse(hit.ID)
 		if err != nil {
-
+			// TODO: what does this error mean.
+			f.logger.Error(err)
 		}
+
 		food, err := f.repo.GetFood(ctx, id)
-		if err != nil {
-			batchErr.ids = append(batchErr.ids, id.String())
+		errNoExist := &port.ErrEntityNoExist{}
+		if errors.As(err, errNoExist) {
+			missingIds = append(missingIds, id.String())
 			continue
 		}
 
 		foods = append(foods, food)
 	}
 
-	if len(batchErr.ids) > 0 {
-		return foods, batchErr
+	if len(missingIds) > 0 {
+		go func() {
+			f.logger.Infof("purging %d ids from index", len(missingIds))
+
+			for _, id := range missingIds {
+				_ = f.index.Delete(id)
+			}
+		}()
 	}
 
 	return foods, nil

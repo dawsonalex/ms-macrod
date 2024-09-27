@@ -3,12 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/blevesearch/bleve"
 	"github.com/dawsonalex/ms-macrod/adapter/storage/inmemory"
 	"github.com/dawsonalex/ms-macrod/core/entity"
-	"github.com/google/uuid"
 	"testing"
 )
 
@@ -28,16 +26,12 @@ func TestFoodListing_Search(t *testing.T) {
 	}
 
 	err = foodListingService.CreateFood(context.Background(), entity.FoodListing{
-		Id:   uuid.New(),
 		Name: "Apples",
 	})
 
 	matches, err := foodListingService.Search(context.Background(), "apples")
 	if err != nil {
-		var batchErr BatchErr
-		if errors.As(err, &batchErr) {
-			t.Fatalf("%s: %v", batchErr.error, batchErr.ids)
-		}
+		t.Fatal(err)
 	}
 	if len(matches) < 1 {
 		t.Error("expected at least one match, but didn't get any")

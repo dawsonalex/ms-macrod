@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"github.com/dawsonalex/ms-macrod/build"
+	"github.com/dawsonalex/ms-macrod/adapter/storage/inmemory"
 	"github.com/dawsonalex/ms-macrod/config"
+	"github.com/dawsonalex/ms-macrod/core/service"
 	"github.com/dawsonalex/ms-macrod/httpserver"
 
 	log "github.com/sirupsen/logrus"
@@ -23,24 +23,16 @@ func run(ctx context.Context, conf config.C) error {
 
 	logger := newLogger(conf.Log)
 	logger.SetFormatter(&log.TextFormatter{})
+	logBuildInfo(logger)
+	logConfig(logger, conf)
 
-	b := build.Info()
-	logger.WithFields(log.Fields{
-		"version":     b.Version.Sprint(),
-		"commit":      b.Commit,
-		"branch":      b.Branch,
-		"host":        b.Host,
-		"environment": b.Environment,
-	}).Info("Starting Server")
-
-	confBytes, err := json.MarshalIndent(conf, "", "  ")
+	repo := inmemory.NewRepository()
+	foodListingService, err := service.NewFoodListing(logger, repo)
 	if err != nil {
-		logger.Warn("Failed to marshal configuration")
-	} else {
-		logger.Infof("config:\n%s", confBytes)
+		panic(err)
 	}
 
-	srv := httpserver.New(conf)
+	srv := httpserver.New(logger, conf, foodListingService)
 	httpServer := &http.Server{
 		// TODO: Decide how to inject config here.
 		Addr:    net.JoinHostPort(conf.Server.Host, conf.Server.Port),
@@ -66,13 +58,6 @@ func run(ctx context.Context, conf config.C) error {
 	}()
 	wg.Wait()
 	return nil
-}
-
-func newLogger(conf config.Log) *log.Logger {
-	logger := log.New()
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(conf.Level)
-	return logger
 }
 
 func main() {

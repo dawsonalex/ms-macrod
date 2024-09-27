@@ -5,8 +5,8 @@ import (
 )
 
 type FoodListing struct {
-	Id       uuid.UUID
-	Name     string
+	Id       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
 	servings map[uuid.UUID]Serving
 }
 

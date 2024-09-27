@@ -1,4 +1,11 @@
 package port
 
-// TODO: At some point this should store common errors (or an error supertype that other errors coming from
-// 	services conform to.
+import "fmt"
+
+type ErrEntityNoExist struct {
+	ID string
+}
+
+func (e ErrEntityNoExist) Error() string {
+	return fmt.Sprintf("entity with id %s does not exist", e.ID)
+}

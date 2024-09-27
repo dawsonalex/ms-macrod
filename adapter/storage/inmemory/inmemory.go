@@ -2,8 +2,8 @@ package inmemory
 
 import (
 	"context"
-	"fmt"
 	"github.com/dawsonalex/ms-macrod/core/entity"
+	"github.com/dawsonalex/ms-macrod/core/port"
 	"github.com/google/uuid"
 	"sync"
 )
@@ -35,7 +35,7 @@ func (i *inMemoryImpl) GetFood(ctx context.Context, id uuid.UUID) (entity.FoodLi
 
 	food, ok := i.foodListings[id]
 	if !ok {
-		return entity.FoodListing{}, fmt.Errorf("food %s not found", id.String())
+		return entity.FoodListing{}, port.ErrEntityNoExist{ID: id.String()}
 	}
 	return food, nil
 }
