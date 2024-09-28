@@ -8,7 +8,15 @@ POST {{base_url}}/foodlisting
 Content-Type: application/json
 
 {
-  "name": "bacon"
+  "name": "bacon",
+  "servings": {
+    "size": "100g",
+    "macros": {
+      "carbs": "1",
+      "fats": "1",
+      "proteins": "1"
+    }
+  }
 }
 
 ###
