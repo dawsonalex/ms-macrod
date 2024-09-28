@@ -11,8 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const foodListingIndexPath = "macrod.foodListing"
-
 type FoodListing struct {
 	repo   port.FoodRepository
 	index  bleve.Index
@@ -37,19 +35,7 @@ func NewFoodListing(logger *log.Logger, repo port.FoodRepository) (*FoodListing,
 
 func createOrOpeBleveIndex() (bleve.Index, error) {
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.NewMemOnly(mapping)
-
-	// If the index exists we can just open it.
-	if err != nil && errors.Is(err, bleve.ErrorIndexPathExists) {
-
-		// If bleve.Open throws an error we have some other issue, return it.
-		index, err = bleve.Open(foodListingIndexPath)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return index, nil
+	return bleve.NewMemOnly(mapping)
 }
 
 func (f *FoodListing) CreateFood(ctx context.Context, food entity.FoodListing) error {
