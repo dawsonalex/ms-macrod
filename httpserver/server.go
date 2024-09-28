@@ -16,5 +16,6 @@ func New(logger *log.Logger, conf config.C, foodListingService *service.FoodList
 		foodListingService,
 	)
 	var handler http.Handler = mux
+	handler = logRequestMiddleware(conf, logger, handler)
 	return handler
 }

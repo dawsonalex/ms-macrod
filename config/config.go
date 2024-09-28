@@ -6,11 +6,17 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/wlevene/ini"
 	"os"
+	"testing"
 )
 
 var flagPath = flag.String("c", ".config.local.ini", "Path to config INI")
 
 func init() {
+	// This is required to allow testing this package
+	// because we're parsing flags before the test flags have
+	// been initialised.
+	// See this StackOverflow:https://stackoverflow.com/questions/67414863/golang-test-fails-on-flags-parse-for-test-v
+	var _ = func() bool { testing.Init(); return true }()
 	flag.Parse()
 }
 
