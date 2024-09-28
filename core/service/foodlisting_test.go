@@ -4,28 +4,30 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/blevesearch/bleve"
 	"github.com/dawsonalex/ms-macrod/adapter/storage/inmemory"
 	"github.com/dawsonalex/ms-macrod/core/entity"
+	log "github.com/sirupsen/logrus"
+	"io"
 	"testing"
 )
 
-func TestFoodListing_Search(t *testing.T) {
+func setupService(t *testing.T) *FoodListing {
 	repo := inmemory.NewRepository()
 
-	index, err := bleve.NewMemOnly(bleve.NewIndexMapping())
+	// setup and return a FoodListing service with discard logger.
+	logger := log.StandardLogger()
+	logger.SetOutput(io.Discard)
+	foodListingService, err := NewFoodListing(logger, repo)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(fmt.Errorf("[setupService()] error creating food listing service: %w", err))
 	}
+	return foodListingService
+}
 
-	// Creating the FoodListing here rather than calling
-	// NewFoodListing so we can use an in-memory index.
-	foodListingService := FoodListing{
-		repo:  repo,
-		index: index,
-	}
+func TestFoodListing_Search(t *testing.T) {
+	foodListingService := setupService(t)
 
-	err = foodListingService.CreateFood(context.Background(), entity.FoodListing{
+	err := foodListingService.CreateFood(context.Background(), entity.FoodListing{
 		Name: "Apples",
 	})
 
