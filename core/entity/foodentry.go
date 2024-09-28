@@ -10,7 +10,7 @@ type FoodEntry struct {
 }
 
 func (f FoodEntry) SelectedServing() Serving {
-	return f.servings[f.SelectedServingId]
+	return f.Servings[f.SelectedServingId]
 }
 
 // Calories returns the number of calories for 100g of Food to nearest whole number.

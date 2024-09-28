@@ -5,36 +5,24 @@ import (
 )
 
 type FoodListing struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	servings map[uuid.UUID]Serving
+	Id       uuid.UUID             `json:"id"`
+	Name     string                `json:"name"`
+	Servings map[uuid.UUID]Serving `json:"servings"`
 }
 
 func NewFoodListing(name string) FoodListing {
 	return FoodListing{
 		Name:     name,
-		servings: map[uuid.UUID]Serving{},
+		Servings: map[uuid.UUID]Serving{},
 	}
-}
-
-func (f *FoodListing) Servings() []Serving {
-	// Note: This might need making safe for concurrent use at some point
-	// TODO: cache this list
-	servings := make([]Serving, len(f.servings))
-	i := 0
-	for _, serving := range f.servings {
-		servings[i] = serving
-		i++
-	}
-	return servings
 }
 
 func (f *FoodListing) AddServing(serving Serving) {
-	if f.servings == nil {
-		f.servings = make(map[uuid.UUID]Serving)
+	if f.Servings == nil {
+		f.Servings = make(map[uuid.UUID]Serving)
 	}
 
-	f.servings[serving.id] = serving
+	f.Servings[serving.id] = serving
 }
 
 func (f *FoodListing) ID() uuid.UUID {
