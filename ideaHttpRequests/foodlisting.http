@@ -1,0 +1,14 @@
+### GET /foodlisting (list all foods)
+GET {{base_url}}/foodlisting?q=bacon
+
+###
+
+### POST request to /foodlisting (create a food)
+POST {{base_url}}/foodlisting
+Content-Type: application/json
+
+{
+  "name": "bacon"
+}
+
+###
