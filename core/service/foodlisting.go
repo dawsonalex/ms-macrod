@@ -52,13 +52,6 @@ func createOrOpeBleveIndex() (bleve.Index, error) {
 	return index, nil
 }
 
-func newFoodListing(repo port.FoodRepository, index bleve.Index) (*FoodListing, error) {
-	return &FoodListing{
-		repo:  repo,
-		index: index,
-	}, nil
-}
-
 func (f *FoodListing) CreateFood(ctx context.Context, food entity.FoodListing) error {
 	if food.Id == uuid.Nil {
 		food.Id = uuid.New()
