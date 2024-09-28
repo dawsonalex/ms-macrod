@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/todo-server.iml" filepath="$PROJECT_DIR$/.idea/todo-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/macrod-server.iml" filepath="$PROJECT_DIR$/.idea/macrod-server.iml" />
     </modules>
   </component>
 </project>
