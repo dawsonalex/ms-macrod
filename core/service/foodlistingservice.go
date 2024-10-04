@@ -8,24 +8,22 @@ import (
 	"github.com/dawsonalex/ms-macrod/core/entity"
 	"github.com/dawsonalex/ms-macrod/core/port"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type FoodListing struct {
 	repo   port.FoodRepository
 	index  bleve.Index
-	logger *log.Entry
+	logger *slog.Logger
 }
 
-func NewFoodListing(logger *log.Logger, repo port.FoodRepository) (*FoodListing, error) {
+func NewFoodListing(logger *slog.Logger, repo port.FoodRepository) (*FoodListing, error) {
 	index, err := createOrOpeBleveIndex()
 	if err != nil {
 		return nil, err
 	}
 
-	serviceLogger := logger.WithFields(log.Fields{
-		"service": "foodlisting",
-	})
+	serviceLogger := logger.With("service", "foodlisting")
 	return &FoodListing{
 		repo:   repo,
 		index:  index,
@@ -68,8 +66,8 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 	for _, hit := range result.Hits {
 		id, err := uuid.Parse(hit.ID)
 		if err != nil {
-			// TODO: what does this error mean.
-			f.logger.Error(err)
+			// TODO: something else should happen here.
+			f.logger.Error("error parsing indexed foodlisting item", err)
 		}
 
 		food, err := f.repo.GetFood(ctx, id)
@@ -84,7 +82,7 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 
 	if len(missingIds) > 0 {
 		go func() {
-			f.logger.Infof("purging %d ids from index", len(missingIds))
+			f.logger.Info("purging %d ids from index", len(missingIds))
 
 			for _, id := range missingIds {
 				_ = f.index.Delete(id)

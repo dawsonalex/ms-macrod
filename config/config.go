@@ -3,7 +3,6 @@ package config
 
 import (
 	"flag"
-	"github.com/sirupsen/logrus"
 	"github.com/wlevene/ini"
 	"os"
 	"testing"
@@ -32,7 +31,11 @@ var Default = &C{
 		Port: "8432",
 	},
 	Log: Log{
-		Level: logrus.InfoLevel,
+		Level:                      LogLevelInfo,
+		HttpCorrelationIDHeaderKey: "X-Correlation-ID",
+		HttpCorrelationIDKey:       "correlation_id",
+
+		IncludeUserAgent: true,
 	},
 }
 

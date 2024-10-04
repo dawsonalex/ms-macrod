@@ -22,7 +22,6 @@ func run(ctx context.Context, conf config.C) error {
 	defer cancel()
 
 	logger := newLogger(conf.Log)
-	logger.SetFormatter(&log.TextFormatter{})
 	logBuildInfo(logger)
 	logConfig(logger, conf)
 
@@ -32,14 +31,14 @@ func run(ctx context.Context, conf config.C) error {
 		panic(err)
 	}
 
-	srv := httpserver.New(logger, conf, foodListingService)
+	srv := httpserver.New(logger.WithGroup("http"), conf, foodListingService)
 	httpServer := &http.Server{
 		// TODO: Decide how to inject config here.
 		Addr:    net.JoinHostPort(conf.Server.Host, conf.Server.Port),
 		Handler: srv,
 	}
 	go func() {
-		logger.Infof("listening on %s\n", httpServer.Addr)
+		logger.Info("listening on %s\n", httpServer.Addr)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 		}

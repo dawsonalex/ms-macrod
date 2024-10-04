@@ -1,27 +1,26 @@
 package httpserver
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/dawsonalex/ms-macrod/build"
 	"github.com/dawsonalex/ms-macrod/config"
 	"github.com/dawsonalex/ms-macrod/core/entity"
 	"github.com/dawsonalex/ms-macrod/core/service"
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 	"net/http"
 )
 
 func addRoutes(
 	mux *http.ServeMux,
 	conf config.C,
-	logger *log.Logger,
+	logger *slog.Logger,
 	foodListingService *service.FoodListing,
 ) {
 	mux.Handle("GET /version", handleVersionGet())
 	mux.Handle("GET /config", handleConfigGet(conf))
 
 	mux.Handle("POST /foodlisting", handleFoodListingCreate(foodListingService))
-	mux.Handle("GET /foodlisting", handleFoodListingSearch(logger, foodListingService))
+	mux.Handle("GET /foodlisting", handleFoodListingSearch(foodListingService))
 }
 
 func handleVersionGet() http.Handler {
@@ -66,7 +65,7 @@ func handleFoodListingCreate(service *service.FoodListing) http.Handler {
 				panic(err)
 			}
 
-			err = service.CreateFood(context.Background(), foodListing)
+			err = service.CreateFood(r.Context(), foodListing)
 			if err != nil {
 				panic(err)
 			}
@@ -74,12 +73,14 @@ func handleFoodListingCreate(service *service.FoodListing) http.Handler {
 	)
 }
 
-func handleFoodListingSearch(logger *log.Logger, s *service.FoodListing) http.Handler {
+func handleFoodListingSearch(s *service.FoodListing) http.Handler {
+	// TODO: Check out what happens with the log context here. We might need to do something to keep the request
+	//		id correct per HTTP request.
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			res := []entity.FoodListing{}
 			if query := r.URL.Query().Get("q"); len(query) > 0 {
-				matches, err := s.Search(context.Background(), query)
+				matches, err := s.Search(r.Context(), query)
 				if err != nil {
 					w.WriteHeader(500)
 					_, err = w.Write([]byte(err.Error()))
