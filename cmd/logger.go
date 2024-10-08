@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/dawsonalex/ms-macrod/build"
 	"github.com/dawsonalex/ms-macrod/config"
 	"log/slog"
@@ -17,15 +15,6 @@ func newLogger(conf config.Log) *slog.Logger {
 	return logger
 }
 
-func logConfig(logger *slog.Logger, conf config.C) {
-	confBytes, err := json.MarshalIndent(conf, "", "  ")
-	if err != nil {
-		logger.Warn("Failed to marshal configuration")
-	} else {
-		logger.Info(fmt.Sprintf("config:\n%s", confBytes))
-	}
-}
-
 func logBuildInfo(logger *slog.Logger) {
 	b := build.Info()
 	logger.With(
@@ -34,5 +23,5 @@ func logBuildInfo(logger *slog.Logger) {
 		"branch", b.Branch,
 		"host", b.Host,
 		"environment", b.Environment,
-	).Info("Starting Server")
+	).Info("Starting macrod")
 }

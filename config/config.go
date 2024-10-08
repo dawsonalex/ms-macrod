@@ -2,8 +2,10 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"github.com/wlevene/ini"
+	"io"
 	"os"
 	"testing"
 )
@@ -59,4 +61,16 @@ func ParseFile(path string) (*C, error) {
 // FlagPath returns the path to the config file provided to the `-c` flag.
 func FlagPath() string {
 	return *flagPath
+}
+
+// WriteTo writes conf to w, returning any errors.
+func WriteTo(w io.Writer, conf C) error {
+	confBytes, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		return err
+	}
+	confBytes = append(confBytes, '\n')
+
+	_, err = w.Write(confBytes)
+	return err
 }
