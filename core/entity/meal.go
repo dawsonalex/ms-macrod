@@ -26,9 +26,9 @@ func (m *Meal) Nutrition() (Macros, int) {
 	macros := Macros{}
 	totalCalories := 0
 	for _, entry := range m.entries {
-		macros.Carbs += entry.SelectedServing().macros.Carbs
-		macros.Fats += entry.SelectedServing().macros.Fats
-		macros.Proteins += entry.SelectedServing().macros.Proteins
+		macros.Carbs += entry.SelectedServing().Carbs
+		macros.Fats += entry.SelectedServing().Fats
+		macros.Proteins += entry.SelectedServing().Proteins
 		totalCalories += entry.Calories()
 	}
 

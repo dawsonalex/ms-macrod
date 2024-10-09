@@ -1,4 +1,4 @@
-package inmemory
+package storage
 
 import (
 	"context"
@@ -8,28 +8,29 @@ import (
 	"sync"
 )
 
-// TODO: context needs using here.
+// port interface implementation check
+var _ port.FoodRepository = &InMemory{}
 
-// inMemoryImpl implements all repository ports.
-type inMemoryImpl struct {
+// InMemory implements all repository ports.
+type InMemory struct {
 	sync.RWMutex
 	foodListings map[uuid.UUID]entity.FoodListing
 }
 
-func NewRepository() *inMemoryImpl {
-	return &inMemoryImpl{
+func NewInMemory() *InMemory {
+	return &InMemory{
 		foodListings: make(map[uuid.UUID]entity.FoodListing),
 	}
 }
 
-func (i *inMemoryImpl) CreateFood(ctx context.Context, food entity.FoodListing) (err error) {
+func (i *InMemory) CreateFood(ctx context.Context, food entity.FoodListing) (err error) {
 	i.Lock()
 	defer i.Unlock()
-	i.foodListings[food.ID()] = food
+	i.foodListings[food.Id] = food
 	return nil
 }
 
-func (i *inMemoryImpl) GetFood(ctx context.Context, id uuid.UUID) (entity.FoodListing, error) {
+func (i *InMemory) GetFood(ctx context.Context, id uuid.UUID) (entity.FoodListing, error) {
 	i.RLock()
 	defer i.RUnlock()
 
@@ -40,7 +41,7 @@ func (i *inMemoryImpl) GetFood(ctx context.Context, id uuid.UUID) (entity.FoodLi
 	return food, nil
 }
 
-func (i *inMemoryImpl) GetAllFood(ctx context.Context, ids ...uuid.UUID) ([]entity.FoodListing, error) {
+func (i *InMemory) GetAllFood(ctx context.Context, ids ...uuid.UUID) ([]entity.FoodListing, error) {
 	i.RLock()
 	defer i.RUnlock()
 

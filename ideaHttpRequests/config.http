@@ -1,0 +1,4 @@
+### GET /config (get config)
+GET {{base_url}}/config
+
+###

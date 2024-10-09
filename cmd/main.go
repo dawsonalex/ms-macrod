@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dawsonalex/ms-macrod/adapter/storage/inmemory"
+	"github.com/dawsonalex/ms-macrod/adapter/storage"
 	"github.com/dawsonalex/ms-macrod/config"
 	"github.com/dawsonalex/ms-macrod/core/service"
 	"github.com/dawsonalex/ms-macrod/httpserver"
@@ -23,7 +23,7 @@ func run(ctx context.Context, conf config.C) error {
 	logger := newLogger(conf.Log)
 	logBuildInfo(logger)
 
-	repo := inmemory.NewRepository()
+	repo := storage.NewInMemory()
 	foodListingService, err := service.NewFoodListing(logger, repo)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Fatal: cannot init food listing service: %v", err))

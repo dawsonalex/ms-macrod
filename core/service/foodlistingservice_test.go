@@ -4,20 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/dawsonalex/ms-macrod/adapter/storage/inmemory"
+	"github.com/dawsonalex/ms-macrod/adapter/storage"
 	"github.com/dawsonalex/ms-macrod/core/entity"
-	log "github.com/sirupsen/logrus"
-	"io"
+	"log/slog"
 	"testing"
 )
 
 func setupService(t *testing.T) *FoodListing {
-	repo := inmemory.NewRepository()
+	repo := storage.NewInMemory()
 
 	// setup and return a FoodListing service with discard logger.
-	logger := log.StandardLogger()
-	logger.SetOutput(io.Discard)
-	foodListingService, err := NewFoodListing(logger, repo)
+	foodListingService, err := NewFoodListing(slog.Default(), repo)
 	if err != nil {
 		t.Fatal(fmt.Errorf("[setupService()] error creating food listing service: %w", err))
 	}

@@ -14,7 +14,7 @@ import (
 type FoodListing struct {
 	repo   port.FoodRepository
 	index  bleve.Index
-	logger *slog.Logger
+	Logger *slog.Logger
 }
 
 func NewFoodListing(logger *slog.Logger, repo port.FoodRepository) (*FoodListing, error) {
@@ -27,7 +27,7 @@ func NewFoodListing(logger *slog.Logger, repo port.FoodRepository) (*FoodListing
 	return &FoodListing{
 		repo:   repo,
 		index:  index,
-		logger: serviceLogger,
+		Logger: serviceLogger,
 	}, nil
 }
 
@@ -46,7 +46,7 @@ func (f *FoodListing) CreateFood(ctx context.Context, food entity.FoodListing) e
 		return err
 	}
 
-	return f.index.Index(food.ID().String(), food.Name)
+	return f.index.Index(food.Id.String(), food.Name)
 }
 
 func (f *FoodListing) GetFood(ctx context.Context, id uuid.UUID) (entity.FoodListing, error) {
@@ -67,7 +67,7 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 		id, err := uuid.Parse(hit.ID)
 		if err != nil {
 			// TODO: something else should happen here.
-			f.logger.Error("error parsing indexed foodlisting item", err)
+			f.Logger.Error("error parsing indexed foodlisting item", err)
 		}
 
 		food, err := f.repo.GetFood(ctx, id)
@@ -82,7 +82,7 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 
 	if len(missingIds) > 0 {
 		go func() {
-			f.logger.Info("purging %d ids from index", len(missingIds))
+			f.Logger.Info("purging %d ids from index", len(missingIds))
 
 			for _, id := range missingIds {
 				_ = f.index.Delete(id)

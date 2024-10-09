@@ -5,26 +5,14 @@ import (
 )
 
 type FoodListing struct {
-	Id       uuid.UUID             `json:"id"`
-	Name     string                `json:"name"`
-	Servings map[uuid.UUID]Serving `json:"servings"`
+	Id       uuid.UUID         `json:"id,omitempty"`
+	Name     string            `json:"name"`
+	Servings map[string]Macros `json:"servings"`
 }
 
 func NewFoodListing(name string) FoodListing {
 	return FoodListing{
 		Name:     name,
-		Servings: map[uuid.UUID]Serving{},
+		Servings: map[string]Macros{},
 	}
-}
-
-func (f *FoodListing) AddServing(serving Serving) {
-	if f.Servings == nil {
-		f.Servings = make(map[uuid.UUID]Serving)
-	}
-
-	f.Servings[serving.id] = serving
-}
-
-func (f *FoodListing) ID() uuid.UUID {
-	return f.Id
 }

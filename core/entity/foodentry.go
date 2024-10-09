@@ -5,11 +5,11 @@ import "github.com/google/uuid"
 type FoodEntry struct {
 	FoodListing
 	id                uuid.UUID
-	SelectedServingId uuid.UUID
+	SelectedServingId string
 	Quantity          float64
 }
 
-func (f FoodEntry) SelectedServing() Serving {
+func (f FoodEntry) SelectedServing() Macros {
 	return f.Servings[f.SelectedServingId]
 }
 
