@@ -1,0 +1,4 @@
+### GET /version (get version and build info)
+GET {{base_url}}/version
+
+###

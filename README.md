@@ -17,3 +17,13 @@ build               build the server, default output to ${BIN_DIR}/${BIN_NAME}
 rm-bin              remove the bin dir
 help                Generate list of targets with descriptions
 ```
+
+## Versioning
+
+With the service running, call the `GET /version` endpoint to get version
+and build data. 
+
+The current version is stored in [build/version](build/version) and should be
+updated as required when a release occurs.
+
+Other build data is automatically added when calling `make bulid`.
