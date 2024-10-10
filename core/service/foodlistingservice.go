@@ -58,7 +58,7 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 	searchRequest := bleve.NewSearchRequest(bleveQuery)
 	result, err := f.index.Search(searchRequest)
 	if err != nil {
-		return nil, fmt.Errorf("query (%s) search err: %s", query, err.Error())
+		return nil, fmt.Errorf("query (%s) search err: %w", query, err)
 	}
 
 	foods := []entity.FoodListing{}
@@ -82,7 +82,7 @@ func (f *FoodListing) Search(ctx context.Context, query string) ([]entity.FoodLi
 
 	if len(missingIds) > 0 {
 		go func() {
-			f.Logger.Info("purging %d ids from index", len(missingIds))
+			f.Logger.Debug("purging %d ids from index", len(missingIds))
 
 			for _, id := range missingIds {
 				_ = f.index.Delete(id)

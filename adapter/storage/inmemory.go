@@ -12,6 +12,8 @@ import (
 var _ port.FoodRepository = &InMemory{}
 
 // InMemory implements all repository ports.
+//
+// InMemory is safe for concurrent use.
 type InMemory struct {
 	sync.RWMutex
 	foodListings map[uuid.UUID]entity.FoodListing
